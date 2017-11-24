@@ -101,4 +101,7 @@ ENV/
 .mypy_cache/
 
 # Downloaded dlib models
-.dat
+*.dat
+
+# Temporary file for storing face data
+faces.npy
