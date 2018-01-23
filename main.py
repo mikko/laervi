@@ -5,6 +5,7 @@ import dlib
 import numpy as np
 import time
 import threading
+import glob
 
 from skimage import io
 
@@ -80,6 +81,7 @@ def handle_frame(origFrame, cb):
 
 def webcam(cb):
   global identifying
+
   video_capture = cv2.VideoCapture(0)
 
   while True:
@@ -101,11 +103,18 @@ def webcam(cb):
 
 def load_enrolled_faces():
   global enrolled_faces
-  if (not os.path.isfile('faces.npy')):
-    print('No enrolled faces found')
-  else:
-    print('Enrolled faces loaded from faces.npy')
-    enrolled_faces = np.load('faces.npy').item()
+  enrolled_faces = np.load('faces.npy').item()
+
+def enroll_face(image, name):
+  # find face
+  faces = faces_from_image(image)
+  # Pick largest face
+  face = faces[0] if faces else None
+  # face to vector
+  face_vector = face_to_vector(image, face)
+  # save to enrolled faces list
+  enrolled_faces[name] = face_vector
+  # save npy file
 
 def logger(identifier, distance, duration):
   if (identifier == '-'):
@@ -115,5 +124,20 @@ def logger(identifier, distance, duration):
   else:
     print(identifier, distance, duration)
 
-load_enrolled_faces()
+def enrollImages():
+  print('Enrolling all images')
+  for filename in glob.glob('faces/*.jpg'):
+    print(filename)
+    name = filename.split('/')[1].split('.')[0]
+    image = image_from_file(filename)
+    enroll_face(image, name)
+  np.save('faces.npy', enrolled_faces)
+  print('Saved faces.npy')
+
+if (not os.path.isfile('faces.npy')):
+    enrollImages()
+else:
+  print('Loading enrolled faces from faces.npy')
+  load_enrolled_faces()
+
 webcam(logger)
