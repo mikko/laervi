@@ -106,15 +106,20 @@ def load_enrolled_faces():
   enrolled_faces = np.load('faces.npy').item()
 
 def enroll_face(image, name):
-  # find face
-  faces = faces_from_image(image)
-  # Pick largest face
-  face = faces[0] if faces else None
-  # face to vector
-  face_vector = face_to_vector(image, face)
-  # save to enrolled faces list
-  enrolled_faces[name] = face_vector
-  # save npy file
+  try:
+    # find face
+    faces = faces_from_image(image)
+    # Pick largest face
+    face = faces[0] if faces else None
+    # face to vector
+    face_vector = face_to_vector(image, face)
+    # save to enrolled faces list
+    enrolled_faces[name] = face_vector
+    # save npy file
+  except Exception as e:
+    print('Unable to enroll', name)
+    print(e)
+
 
 def logger(identifier, distance, duration):
   if (identifier == '-'):
@@ -131,6 +136,7 @@ def enrollImages():
     name = filename.split('/')[1].split('.')[0]
     image = image_from_file(filename)
     enroll_face(image, name)
+    print('Enrolled', name)
   np.save('faces.npy', enrolled_faces)
   print('Saved faces.npy')
 
