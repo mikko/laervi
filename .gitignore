@@ -105,3 +105,6 @@ ENV/
 
 # Temporary file for storing face data
 faces.npy
+
+# faces data
+/faces
